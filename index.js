@@ -1,7 +1,7 @@
 'use strict';
 var path = require('path'),
     Q = require('q'),
-    utils = require('../lib/utils'),
+    utils = require('./lib/utils'),
     mkdirp = require('mkdirp'),
     concat = require('concat-stream'),
     localizr = require('localizr'),
@@ -198,4 +198,3 @@ function copy(srcFile, destFile) {
     });
     return deferred.promise;
 }
-
