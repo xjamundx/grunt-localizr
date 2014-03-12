@@ -1,4 +1,10 @@
 {
+  "name": "grunt-localizr",
+  "version": "0.0.1",
+  "author": {
+    "name": "Poornima Venkatakrishnan",
+    "email": "pvenkatakrishnan@paypal.com"
+  },
   "dependencies": {
     "localizr": "git://github.com/totherik/localizr.git",
     "mkdirp": "~0.3.5",
