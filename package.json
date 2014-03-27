@@ -1,6 +1,6 @@
 {
   "name": "grunt-localizr",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": {
     "name": "Poornima Venkatakrishnan",
     "email": "pvenkatakrishnan@paypal.com"
@@ -10,7 +10,7 @@
     "url": "https://github.com/krakenjs/grunt-localizr"
   },
   "dependencies": {
-    "localizr": "git://github.com/totherik/localizr.git",
+    "localizr": "~0.1.0",
     "mkdirp": "~0.3.5",
     "q": "~1.0.0",
     "graceful-fs": "~2.0.2",
