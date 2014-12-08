@@ -10,11 +10,12 @@
     "url": "https://github.com/krakenjs/grunt-localizr"
   },
   "dependencies": {
+    "concat-stream": "~1.4.3",
+    "graceful-fs": "~2.0.2",
     "localizr": "~0.1.0",
     "mkdirp": "~0.3.5",
     "q": "~1.0.0",
-    "graceful-fs": "~2.0.2",
-    "concat-stream": "~1.4.3"
+    "qlimit": "^0.1.1"
   },
   "devDependencies": {
     "tape": "^2.12.0",
