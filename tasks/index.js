@@ -23,7 +23,7 @@ var path = require('path'),
     mkdirp = require('mkdirp'),
     concat = require('concat-stream'),
     localizr = require('localizr'),
-    qlimit = require('qlimit'),
+    qlimit = require('qlimit')(10),
     fs = require('fs'),
     logger;
 
@@ -75,9 +75,9 @@ module.exports = function (grunt) {
         // TODO: Currently only honors one locale directory.
         bundleRoot = Array.isArray(bundleRoot) ? bundleRoot[0] : bundleRoot;
         bundles = (grunt.file.expand(contentPath)).map(correctPathSeparator);
-        Q.all(filesSrc.map(qlimit(10)(function (srcFile) {
+        Q.all(filesSrc.map(function (srcFile) {
             return processSrcDust(srcFile, bundles, bundleRoot, options);
-        }))).then(done);
+        })).then(done);
     });
 };
 
@@ -170,7 +170,7 @@ function localize(srcFile, propFile, destFile) {
     return deferred.promise;
 }
 
-function copy(srcFile, destFile) {
+var copy = qlimit(function copy(srcFile, destFile) {
     var deferred = Q.defer();
     mkdirp(path.dirname(destFile), function (err) {
         if (err) {
@@ -183,7 +183,7 @@ function copy(srcFile, destFile) {
         deferred.resolve();
     });
     return deferred.promise;
-}
+});
 
 //the following is for the watch task to build just the dust files relevant
 //when a property file is changed
