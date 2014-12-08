@@ -23,6 +23,7 @@ var path = require('path'),
     mkdirp = require('mkdirp'),
     concat = require('concat-stream'),
     localizr = require('localizr'),
+    qlimit = require('qlimit'),
     fs = require('fs'),
     logger;
 
@@ -74,9 +75,9 @@ module.exports = function (grunt) {
         // TODO: Currently only honors one locale directory.
         bundleRoot = Array.isArray(bundleRoot) ? bundleRoot[0] : bundleRoot;
         bundles = (grunt.file.expand(contentPath)).map(correctPathSeparator);
-        Q.all(filesSrc.map(function (srcFile) {
+        Q.all(filesSrc.map(qlimit(10)(function (srcFile) {
             return processSrcDust(srcFile, bundles, bundleRoot, options);
-        })).then(done);
+        }))).then(done);
     });
 };
 
