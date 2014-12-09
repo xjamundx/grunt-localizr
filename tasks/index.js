@@ -41,7 +41,7 @@ module.exports = function (grunt) {
     grunt.registerMultiTask('localizr', 'A preprocessor for Dust.js templates.', function () {
         var done, options, contentPath, bundles, bundleRoot, filesSrc,
             pathName = path.sep + '**' + path.sep + '*.properties',
-            fileRoot = path.join('public', 'templates'),
+            fileRoot = this.options().templateRoot || path.join('public', 'templates'),
             propFile = this.options().contentFile,
             promise;
 
