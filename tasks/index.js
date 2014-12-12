@@ -183,9 +183,9 @@ var copy = qlimit(function copy(srcFile, destFile) {
                 logger.write('Generated ', destFile, '\n');
                 deferred.resolve();
             }).on('error', function(err) {
-            logger.write('Failed to generate', destFile, '\n');
-            deferred.reject(err);
-        }));
+                logger.write('Failed to generate', destFile, '\n');
+                deferred.reject(err);
+            }));
     });
     return deferred.promise;
 });
