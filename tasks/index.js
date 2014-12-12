@@ -178,10 +178,11 @@ var copy = qlimit(function copy(srcFile, destFile) {
             logger.error('Failed to generate', srcFile, ' from ', destFile, 'error', err, '\n');
             return;
         }
-        fs.createReadStream(srcFile).pipe(fs.createWriteStream(destFile).on('finish', function() {
-            logger.write('Generated ', destFile, '\n');
-            deferred.resolve();
-        }).on('error', function(err) {
+        fs.createReadStream(srcFile).pipe(fs.createWriteStream(destFile)
+            .on('finish', function() {
+                logger.write('Generated ', destFile, '\n');
+                deferred.resolve();
+            }).on('error', function(err) {
             logger.write('Failed to generate', destFile, '\n');
             deferred.reject(err);
         }));
