@@ -13,7 +13,10 @@ This plugin uses that localizr module, and scans your project under the root app
 * `.dust` files in `public/templates`
 * `.properties` content files for corresponding `.dust` files in `locales/` folder
 
-and localizes the `.dust` files using the content from `.properties` bundles using [localizr](https://github.com/krakenjs/localizr).
+and puts the localized files in `tmp/` dir.
+For example:
+Localizing `public/templates/foo/bar.dust` with `locales/US/en/foo/bar.properties` will generate `tmp/US/en/foo/bar.dust`
+
 
 ##Usage
 
