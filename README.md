@@ -5,4 +5,38 @@ Lead Maintainer: [Aria Stewart](https://github.com/aredridel)
 
 [![Build Status](https://travis-ci.org/krakenjs/grunt-localizr.svg?branch=master)](https://travis-ci.org/krakenjs/grunt-localizr)
 
-A grunt task to support i18n using localizr module.
+A grunt task to support i18n using localizr module for dust templates. i18n is solved the way kraken supports today using `.properties` files.
+
+The [localizr](https://github.com/krakenjs/localizr) module is a tool to apply localization to dust templates before rendering.
+This plugin uses that localizr module, and scans your project under the root app directory for
+
+* `.dust` files in `public/templates`
+* `.properties` content files for corresponding `.dust` files in `locales/` folder
+
+and localizes the `.dust` files using the content from `.properties` bundles using [localizr](https://github.com/krakenjs/localizr).
+
+##Usage
+
+In your Gruntfile.js
+
+```
+module.exports = function localizr(grunt) {
+	// Load task
+	grunt.loadNpmTasks('grunt-localizr');
+
+	// Options
+	return {
+	    files: ['public/templates/**/*.dust'],
+        options: {
+            contentPath: ['locales/**/*.properties']
+        }
+	};
+};
+
+```
+
+## Using with kraken 1.0 apps
+If you use [generator-kraken](https://github.com/krakenjs/grunt-localizr) for scaffolding your kraken apps, you will see
+the `gruntfile` automatically pulling in the right tasks to bootstrap the i18n grunt task.
+
+
