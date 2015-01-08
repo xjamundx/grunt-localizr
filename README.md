@@ -39,7 +39,7 @@ module.exports = function localizr(grunt) {
 ```
 
 ## Using with kraken 1.0 apps
-If you use [generator-kraken](https://github.com/krakenjs/grunt-localizr) for scaffolding your kraken apps, you will see
-the `gruntfile` automatically pulling in the right tasks to bootstrap the i18n grunt task.
+If you use [generator-kraken](git@github.com:krakenjs/generator-kraken.git) for scaffolding your kraken apps, you will see
+that the generated `Gruntfile.js` will be automatically setting up the i18n task for you.
 
 
