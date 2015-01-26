@@ -68,4 +68,37 @@ test('Grunt-localizr', function (t) {
 
         });
     });
+
+    t.test('test a localizr build with three templates same name/ different dir , 2 with .properties file, 1 with no .properties, ' +
+        'also makes sure absence of a properties file for a locale does not break the build', function(t) {
+        grunt.initConfig({
+            localizr: {
+                files: ['cornercase/templates/**/*.dust'],
+                options: {
+                    contentPath: ['cornercase/locales/**/*.properties'],
+                    templateRoot: 'cornercase/templates'
+                }
+            }
+        });
+
+        require('../tasks/index')(grunt);
+        grunt.tasks(['localizr'], {}, function(){
+            //verify the files exist
+            t.equal(true, fs.existsSync('./tmp/US/en/test.dust'));
+            t.equal(true, fs.existsSync('./tmp/US/en/nested1/test.dust'));
+            t.equal(true, fs.existsSync('./tmp/US/en/nested2/test.dust'));
+
+            //verify they have expected content
+            t.equal('<div>Hola</div>', fs.readFileSync('./tmp/US/es/test.dust', 'utf8'));
+            t.equal('<div>I am translated to algo</div>', fs.readFileSync('./tmp/US/es/nested1/test.dust', 'utf8'));
+            t.equal('<div>I am cool and don\'t need any pre tags</div>', fs.readFileSync('./tmp/US/en/nested2/test.dust', 'utf8'));
+
+            rimraf('tmp', function() {
+                console.info('called in here');
+                t.end();
+            });
+
+        });
+    });
 });
+

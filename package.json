@@ -10,6 +10,7 @@
     "url": "https://github.com/krakenjs/grunt-localizr"
   },
   "dependencies": {
+    "bluebird": "^2.9.2",
     "concat-stream": "~1.4.3",
     "graceful-fs": "~2.0.2",
     "localizr": "~0.1.0",
