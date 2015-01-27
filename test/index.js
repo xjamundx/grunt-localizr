@@ -110,7 +110,6 @@ test('Grunt-localizr', function (t) {
             }
         });
         grunt.tasks(['localizr'], {}, function(){
-            //verify the files exist
              t.end();
         });
         t.end();
