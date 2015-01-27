@@ -98,20 +98,5 @@ test('Grunt-localizr', function (t) {
 
         });
     });
-
-    t.test('test wrong root path', function(t) {
-        grunt.initConfig({
-            localizr: {
-                files: ['errorcase/templates/**/*.dust'],
-                options: {
-                    contentPath: ['errorcase/locales/**/*.properties'],
-                    templateRoot: 'errorcase/templates'
-                }
-            }
-        });
-        grunt.tasks(['localizr'], {}, function(){
-             t.end();
-        });
-    });
 });
 
