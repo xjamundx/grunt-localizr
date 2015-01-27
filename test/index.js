@@ -112,8 +112,6 @@ test('Grunt-localizr', function (t) {
         grunt.tasks(['localizr'], {}, function(){
              t.end();
         });
-        t.end();
-
     });
 });
 
