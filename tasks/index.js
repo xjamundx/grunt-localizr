@@ -72,15 +72,18 @@ module.exports = function (grunt) {
 
         // TODO: Currently only honors one locale directory.
         bundleRoot = Array.isArray(bundleRoot) ? bundleRoot[0] : bundleRoot;
-
-        //bundles = (grunt.file.expand(contentPath)).map(correctPathSeparator);
         localeList(path.join(process.cwd(), bundleRoot), function (err, locales) {
+            if (err) {
+                logger.error('Terminating due to err', err);
+                return;
+            }
             BB.all(filesSrc.map(function (srcFile) {
                 return processSrcDust(srcFile, locales, bundleRoot, options);
-            })).then(done)
-                .catch(function (err) {
-                    logger.error('Terminating due to err', err);
-                });
+            }))
+            .then(done)
+            .catch(function (err) {
+                logger.error('Terminating due to err', err);
+            });
         });
     });
 };
