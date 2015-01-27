@@ -147,6 +147,7 @@ function localize(srcFile, propFile, destFile) {
         if (err) {
             deferred.resolve(); //we want to continue with compiling other templates
             logger.error('Failed to generate', destFile, ' from ', srcFile, 'error', err, '\n');
+            return;
 
         }
         var out = concat({ encoding: 'string' }, function (data) {
@@ -154,6 +155,7 @@ function localize(srcFile, propFile, destFile) {
                 if (err) {
                     deferred.resolve(); //we want to continue with compiling other templates
                     logger.error('Failed to generate', destFile, ' from ', srcFile, 'error', err, '\n');
+                    return;
                 }
                 deferred.resolve(destFile);
                 logger.write('Generated ', destFile, '\n');
