@@ -87,6 +87,7 @@ test('Grunt-localizr', function (t) {
             t.equal(true, fs.existsSync('./tmp/US/en/test.dust'));
             t.equal(true, fs.existsSync('./tmp/US/en/nested1/test.dust'));
             t.equal(true, fs.existsSync('./tmp/US/en/nested2/test.dust'));
+            t.equal(false, fs.existsSync('./tmp/US/fr/test.dust'));
 
             //verify they have expected content
             t.equal('<div>Hola</div>', fs.readFileSync('./tmp/US/es/test.dust', 'utf8'));

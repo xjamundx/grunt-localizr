@@ -18,7 +18,7 @@
 
 'use strict';
 var path = require('path'),
-    Q = require('q'),
+    BB = require('bluebird'),
     utils = require('../lib/utils'),
     mkdirp = require('mkdirp'),
     concat = require('concat-stream'),
@@ -75,18 +75,18 @@ module.exports = function (grunt) {
 
         //bundles = (grunt.file.expand(contentPath)).map(correctPathSeparator);
         localeList(path.join(process.cwd(), bundleRoot), function (err, locales) {
-            Q.all(filesSrc.map(function (srcFile) {
+            BB.all(filesSrc.map(function (srcFile) {
                 return processSrcDust(srcFile, locales, bundleRoot, options);
             })).then(done)
                 .catch(function (err) {
-                    console.error('Terminating due to err', err);
+                    logger.error('Terminating due to err', err);
                 });
         });
     });
 };
 
 function processSrcDust(srcFile, locales, bundleRoot, options) {
-    var deferred = Q.defer(),
+    var deferred = BB.pending(),
         fileBundles,
         name = utils.getName(srcFile, options.fileRoot),
         propName = name + '.properties',
@@ -106,7 +106,7 @@ function processSrcDust(srcFile, locales, bundleRoot, options) {
     } else {
         dustPromises = dustPromises.concat(processWithBundles(srcFile, fileBundles, bundleRoot, options));
     }
-    Q.all(dustPromises).then(function () {
+    BB.all(dustPromises).then(function () {
         deferred.resolve();
     });
 
@@ -134,7 +134,7 @@ function localize(srcFile, propFile, destFile) {
             src: srcFile,
             props: propFile
         },
-        deferred = Q.defer();
+        deferred = BB.pending();
 
     srcFile = path.join(process.cwd(), srcFile);
     destFile = path.join(process.cwd(), destFile);
@@ -174,7 +174,7 @@ function localize(srcFile, propFile, destFile) {
 }
 
 var copy = qlimit(function copy(srcFile, destFile) {
-    var deferred = Q.defer();
+    var deferred = BB.pending();
     mkdirp(path.dirname(destFile), function (err) {
         if (err) {
             deferred.reject(err);
