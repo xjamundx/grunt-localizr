@@ -75,6 +75,7 @@ module.exports = function (grunt) {
         localeList(path.join(process.cwd(), bundleRoot), function (err, locales) {
             if (err) {
                 logger.error('Terminating due to err', err);
+                done(err);
                 return;
             }
             BB.all(filesSrc.map(function (srcFile) {
@@ -83,6 +84,7 @@ module.exports = function (grunt) {
             .then(done)
             .catch(function (err) {
                 logger.error('Terminating due to err', err);
+                done(err);
             });
         });
     });

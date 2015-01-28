@@ -5,7 +5,7 @@ var grunt = require('grunt'),
     fs = require('fs'),
     rimraf = require('rimraf');
 
-
+grunt.loadNpmTasks('grunt-force-task');
 test('Grunt-localizr', function (t) {
     process.chdir(path.join(process.cwd(), 'test', 'fixtures'));
     grunt.task.init = function() {};
@@ -96,6 +96,22 @@ test('Grunt-localizr', function (t) {
                 t.end();
             });
 
+        });
+    });
+
+    t.test('test wrong root path', function(t) {
+
+        grunt.initConfig({
+            localizr: {
+                files: ['errorcase/templates/**/*.dust'],
+                options: {
+                    contentPath: ['errorcase/locales/**/*.properties'],
+                    templateRoot: 'errorcase/templates'
+                }
+            }
+        });
+        grunt.tasks(['force:localizr'], {}, function() {
+            t.end();
         });
     });
 });

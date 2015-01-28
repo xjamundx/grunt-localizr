@@ -6,7 +6,7 @@ var test = require('tape'),
 test('localeList', function (t) {
   t.test('should generate proper list of locale directories', function(t) {
     localeList(path.resolve(__dirname , 'fixtures/cornercase/locales'), function(err, result) {
-      t.deepEqual(result.sort(), ([ 'US', 'US/en', 'US/es' ]).sort());
+      t.deepEqual(result.sort(), ([ 'US', 'US/en', 'US/es', 'US/fr' ]).sort());
       t.end();
     });
   });
