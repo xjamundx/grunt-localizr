@@ -18,13 +18,14 @@
 
 'use strict';
 var path = require('path'),
-    Q = require('q'),
+    BB = require('bluebird'),
     utils = require('../lib/utils'),
     mkdirp = require('mkdirp'),
     concat = require('concat-stream'),
     localizr = require('localizr'),
     qlimit = require('qlimit')(10),
     fs = require('fs'),
+    localeList = require('../lib/localeList'),
     logger;
 
 function endsWith(str, frag) {
@@ -39,11 +40,9 @@ function correctPathSeparator(filePath) {
 module.exports = function (grunt) {
     logger = grunt.log;
     grunt.registerMultiTask('localizr', 'A preprocessor for Dust.js templates.', function () {
-        var done, options, contentPath, bundles, bundleRoot, filesSrc,
+        var done, options, contentPath, bundleRoot, filesSrc,
             pathName = path.sep + '**' + path.sep + '*.properties',
-            fileRoot = this.options().templateRoot || path.join('public', 'templates'),
-            propFile = this.options().contentFile,
-            promise;
+            fileRoot = this.options().templateRoot || path.join('public', 'templates');
 
         done = this.async();
 
@@ -58,7 +57,6 @@ module.exports = function (grunt) {
 
         contentPath = contentPath.map(correctPathSeparator);
 
-        //console.info('contentPath:', contentPath);
         filesSrc = this.filesSrc.map(correctPathSeparator);
         contentPath = contentPath.map(function (cp) {
             var regexp = new RegExp('([\\' + path.sep + ']?)$');
@@ -74,53 +72,57 @@ module.exports = function (grunt) {
 
         // TODO: Currently only honors one locale directory.
         bundleRoot = Array.isArray(bundleRoot) ? bundleRoot[0] : bundleRoot;
-        bundles = (grunt.file.expand(contentPath)).map(correctPathSeparator);
-        Q.all(filesSrc.map(function (srcFile) {
-            return processSrcDust(srcFile, bundles, bundleRoot, options);
-        })).then(done);
+        localeList(path.join(process.cwd(), bundleRoot), function (err, locales) {
+            if (err) {
+                logger.error('Terminating due to err', err);
+                done(err);
+                return;
+            }
+            BB.all(filesSrc.map(function (srcFile) {
+                return processSrcDust(srcFile, locales, bundleRoot, options);
+            }))
+            .then(done)
+            .catch(function (err) {
+                logger.error('Terminating due to err', err);
+                done(err);
+            });
+        });
     });
 };
 
-function processSrcDust(srcFile, bundles, bundleRoot, options) {
-    var deferred = Q.defer(),
+function processSrcDust(srcFile, locales, bundleRoot, options) {
+    var deferred = BB.pending(),
         fileBundles,
         name = utils.getName(srcFile, options.fileRoot),
         propName = name + '.properties',
         dustPromises = [];
 
     //get the bundles that correspond to this file
-    fileBundles = bundles.filter(function (entry) {
-        return (entry.indexOf(propName) !== -1);
-    });
+
+    fileBundles = locales.map(function (entry) {
+            return path.join(bundleRoot, entry, propName);
+        }).filter(function (entry) {
+            return fs.existsSync(path.join(process.cwd(), entry));
+        });
 
     if (fileBundles.length === 0) {
-        dustPromises = dustPromises.concat(processWhenNoBundles(bundles, bundleRoot, srcFile, name, options));
+        dustPromises = dustPromises.concat(processWhenNoBundles(locales, srcFile, name, options));
 
     } else {
         dustPromises = dustPromises.concat(processWithBundles(srcFile, fileBundles, bundleRoot, options));
     }
-    Q.all(dustPromises).then(function () {
+    BB.all(dustPromises).then(function () {
         deferred.resolve();
     });
 
     return deferred.promise;
 }
 
-function processWhenNoBundles(bundles, bundleRoot, srcFile, name, options) {
-    return bundles.map(function (entry) {
-            var arr = entry.split(path.sep);
-            arr.pop();
-            arr.shift();
-            if (arr.length > 2) {
-                arr = arr.slice(0, 2);
-            }
-            return arr.join(path.sep);
-        }).filter(function (entry, index, self) {
-            return (self.indexOf(entry) === index);
-        }).map(function (entry) {
-            var destFile = path.join(process.cwd(), options.tmpDir, entry, name + '.dust');
-            return copy(srcFile, destFile);
-        });
+function processWhenNoBundles(locales, srcFile, name, options) {
+    return locales.map(function (entry) {
+        var destFile = path.join(process.cwd(), options.tmpDir, entry, name + '.dust');
+        return copy(srcFile, destFile);
+    });
 }
 
 function processWithBundles(srcFile, fileBundles, bundleRoot, options) {
@@ -137,41 +139,48 @@ function localize(srcFile, propFile, destFile) {
             src: srcFile,
             props: propFile
         },
-        deferred = Q.defer();
+        deferred = BB.pending();
 
     srcFile = path.join(process.cwd(), srcFile);
-    propFile = path.join(process.cwd(), propFile);
     destFile = path.join(process.cwd(), destFile);
 
 
     mkdirp(path.dirname(destFile), function (err) {
         if (err) {
-            deferred.reject(err);
-            logger.error('Failed to generate', srcFile, ' from ', destFile, 'error', err, '\n');
+            deferred.resolve(); //we want to continue with compiling other templates
+            logger.error('Failed to generate', destFile, ' from ', srcFile, 'error', err, '\n');
             return;
+
         }
         var out = concat({ encoding: 'string' }, function (data) {
             fs.writeFile(destFile, data, function (err) {
                 if (err) {
-                    deferred.reject(err);
-                    logger.error('Failed to generate', srcFile, ' from ', destFile, 'error', err, '\n');
+                    deferred.resolve(); //we want to continue with compiling other templates
+                    logger.error('Failed to generate', destFile, ' from ', srcFile, 'error', err, '\n');
                     return;
                 }
-                logger.write('Generated ', destFile, '\n');
                 deferred.resolve(destFile);
+                logger.write('Generated ', destFile, '\n');
             });
         });
 
-        localizr.createReadStream(opt).pipe(out);
+        localizr.createReadStream(opt)
+            .on('error', function (err) {
+                logger.error('Error while localizing with ', srcFile, ' and ', propFile);
+                deferred.resolve(); //we want to continue with the compiling other templates
+            })
+            .pipe(out)
+            .on('error', function (err) {
+                logger.error('Error while localizing with ', srcFile, ' and ', propFile);
+                deferred.resolve(); //we want to continue with compiling other templates
+            });
     });
-
-
 
     return deferred.promise;
 }
 
 var copy = qlimit(function copy(srcFile, destFile) {
-    var deferred = Q.defer();
+    var deferred = BB.pending();
     mkdirp(path.dirname(destFile), function (err) {
         if (err) {
             deferred.reject(err);
@@ -179,11 +188,11 @@ var copy = qlimit(function copy(srcFile, destFile) {
             return;
         }
         fs.createReadStream(srcFile).pipe(fs.createWriteStream(destFile)
-            .on('finish', function() {
+            .on('finish', function () {
                 logger.write('Generated ', destFile, '\n');
                 deferred.resolve();
-            }).on('error', function(err) {
-                logger.write('Failed to generate', destFile, '\n');
+            }).on('error', function (err) {
+                logger.error('Failed to generate', destFile, '\n');
                 deferred.reject(err);
             }));
     });
