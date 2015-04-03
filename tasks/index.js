@@ -134,7 +134,7 @@ function processWithBundles(srcFile, fileBundles, bundleRoot, options) {
     });
 }
 
-function localize(srcFile, propFile, destFile) {
+var localize = qlimit(function(srcFile, propFile, destFile) {
     var opt = {
             src: srcFile,
             props: propFile
@@ -177,7 +177,7 @@ function localize(srcFile, propFile, destFile) {
     });
 
     return deferred.promise;
-}
+});
 
 var copy = qlimit(function copy(srcFile, destFile) {
     var deferred = BB.pending();
