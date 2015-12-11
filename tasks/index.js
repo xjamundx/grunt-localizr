@@ -24,7 +24,7 @@ var path = require('path'),
     concat = require('concat-stream'),
     localizr = require('localizr'),
     qlimit = require('qlimit')(10),
-    fs = require('fs'),
+    fs = require('graceful-fs'),
     localeList = require('../lib/localeList'),
     logger;
 
